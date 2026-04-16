@@ -3,21 +3,24 @@ using UnityEngine.AI;
 
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] Transform target; //player
+    PlayerHealth target; //player
     [SerializeField] float chaseramge = 10f;
 
     NavMeshAgent navMeshAgent;
     float distanceToTarget = Mathf.Infinity;
     bool isProvoked = false; 
+    Animator animator;
 
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
+        animator = GetComponentInChildren<Animator>();
+        target = FindFirstObjectByType<PlayerHealth>();
     }
 
     void Update()
     {
-        distanceToTarget = Vector3.Distance(target.position, transform.position); //distance between zombie and player
+        distanceToTarget = Vector3.Distance(target.transform.position, transform.position); //distance between zombie and player
 
         if (isProvoked)
         {
@@ -44,12 +47,14 @@ public class EnemyController : MonoBehaviour
 
     void Chasetarget() //responsable for chasing the player
     {
-        navMeshAgent.SetDestination(target.position); //if distance is less then chase range then follow player
+        animator.SetBool("Attack", false);
+        animator.SetTrigger("Move");
+        navMeshAgent.SetDestination(target.transform.position); //if distance is less then chase range then follow player
     }
 
     void AttackTarget() // responsible for attacking the target
     {
-        Debug.Log(name + "is attacking " + target.name);
+        animator.SetBool("Attack", true);
     }
 
 
