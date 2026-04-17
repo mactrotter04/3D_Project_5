@@ -23,5 +23,6 @@ public class EnemyAttack : MonoBehaviour
         if (target == null) return; //null checks if target is dead
         Debug.Log(name + "attacking " + target.name);
         target.TakeDamage(damage);
+        FindFirstObjectByType<DisplayDamage>().DisplayBloodSplatters();
     }
 }

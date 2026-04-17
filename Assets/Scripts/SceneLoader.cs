@@ -7,16 +7,16 @@ public class SceneLoader : MonoBehaviour
     public void ReloadLevel()
     {
         
-        Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
+        Time.timeScale = 1f; //starts time 
+        Cursor.lockState = CursorLockMode.Locked; //the cursor is invisible in the lock state 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void QuitGame()
     {
-        #if UNITY_EDITOR
+        #if UNITY_EDITOR //exists out of the unity game window
         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+        #endif // exits game
 
         Application.Quit();
     }

@@ -6,20 +6,29 @@ public class EnemyController : MonoBehaviour
     PlayerHealth target; //player
     [SerializeField] float chaseramge = 10f;
 
-    NavMeshAgent navMeshAgent;
     float distanceToTarget = Mathf.Infinity;
-    bool isProvoked = false; 
+    bool isProvoked = false;
+    
     Animator animator;
+    NavMeshAgent navMeshAgent;
+    EnemyHealth enemyHelath;
 
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
         target = FindFirstObjectByType<PlayerHealth>();
+        enemyHelath = GetComponent<EnemyHealth>();
     }
 
     void Update()
     {
+        if (enemyHelath.IsDead()) //disables the enemy controller if enemy is dead
+        {
+            enabled = false;
+            navMeshAgent.enabled = false;
+        }
+
         distanceToTarget = Vector3.Distance(target.transform.position, transform.position); //distance between zombie and player
 
         if (isProvoked)
@@ -55,6 +64,11 @@ public class EnemyController : MonoBehaviour
     void AttackTarget() // responsible for attacking the target
     {
         animator.SetBool("Attack", true);
+    }
+
+    public void OnDamageTaken() //this is making it so when the enemy takes damage they chase them 
+    {
+        isProvoked = true;
     }
 
 
