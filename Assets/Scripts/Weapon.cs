@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngineInternal;
@@ -16,14 +17,19 @@ public class Weapon : MonoBehaviour
     [SerializeField] float timeBetweenShots = 0.5f;
     [SerializeField] AmmoTypes ammoType;
     [SerializeField] TextMeshProUGUI ammoText;
+
     [SerializeField] float reloadTime = 3f;
+    [SerializeField] int maxAmmo = 30;
+    int currentAmmoInClip;
 
     bool canShoot = true;
+    bool isReloading = false;
 
 
     void OnEnable()
     {
         canShoot = true; //this stops the guns not working when you switch while shooting
+        currentAmmoInClip = maxAmmo;
     }
 
     // Update is called once per frame
@@ -45,13 +51,13 @@ public class Weapon : MonoBehaviour
         {
             ProccessRayCast();
             PlayMuzzleFlash();
-            ammoSlot.ReduceCurrentAmmo(ammoType);
+            currentAmmoInClip--;
         }
 
         yield return new WaitForSeconds(timeBetweenShots);
         canShoot = true;
 
-        if (ammoSlot.GetCurrentAmmo(ammoType) > 0)
+        if (ammoSlot.GetCurrentAmmo(ammoType) > 0 && !isReloading)
         {
             StartCoroutine(Reload());
         }
@@ -64,7 +70,7 @@ public class Weapon : MonoBehaviour
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit)) //this is the raycast
         {
             PlayImpactSparks(hit);
-            Debug.Log("hit " + hit.transform.name);
+            //Debug.Log("hit " + hit.transform.name);
             EnemyHealth target = hit.transform.GetComponent<EnemyHealth>(); //refers to any game object with enemy health script 
             if (target == null) return; //checks to see if the enemy is already dead and if it is to skip 
             target.TakeDamage(damage); //applys damage for this certian wepon
@@ -89,15 +95,24 @@ public class Weapon : MonoBehaviour
 
     void DisplayAmmo()
     {
-        int currentAmmo = ammoSlot.GetCurrentAmmo(ammoType);
-        ammoText.text = currentAmmo.ToString();
+        ammoText.text = currentAmmoInClip + " / " + ammoSlot.GetCurrentAmmo(ammoType);
     }
 
     IEnumerator Reload()
     {
+        if(ammoSlot.GetCurrentAmmo(ammoType) <= 0)
+        {
+            yield break;
+        }
+        isReloading = true;
         canShoot = false;
-        //TODO add animation
         yield return new WaitForSeconds(reloadTime);
+        int neededAmmo = maxAmmo - currentAmmoInClip;
+        int ammoAvailibl = ammoSlot.GetCurrentAmmo(ammoType);
+        int AmmoToReload =  Mathf.Min(neededAmmo, ammoAvailibl);
+        currentAmmoInClip += AmmoToReload;
+        ammoSlot.ReduceCurrentAmmo(ammoType, AmmoToReload);
+        isReloading = false;
         canShoot = true;
     }
 }

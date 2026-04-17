@@ -3,8 +3,6 @@ using UnityEngine;
 public class Ammo : MonoBehaviour
 {
     [SerializeField] AmmoSlot[] ammoSlots;
-    [SerializeField] int maxCurrentAmmo;
-    int ammoInClip;
 
     [System.Serializable]
     private class AmmoSlot
@@ -21,7 +19,7 @@ public class Ammo : MonoBehaviour
         GetAmmoSlot(ammoType).ammoAmount += ammoAmount;
     }
 
-    public void ReduceCurrentAmmo(AmmoTypes ammoType)
+    public void ReduceCurrentAmmo(AmmoTypes ammoType, int AmmoToReload)
     {
         GetAmmoSlot(ammoType).ammoAmount--;
     }
