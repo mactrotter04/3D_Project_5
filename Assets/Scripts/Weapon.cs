@@ -25,11 +25,19 @@ public class Weapon : MonoBehaviour
     bool canShoot = true;
     bool isReloading = false;
 
+    Animator weaponAnimator;
+
+    void Awake()
+    {
+        weaponAnimator = GetComponent<Animator>();
+    }
+
 
     void OnEnable()
     {
         canShoot = true; //this stops the guns not working when you switch while shooting
         currentAmmoInClip = maxAmmo;
+        weaponAnimator.SetTrigger("Idle");
     }
 
     // Update is called once per frame
@@ -37,9 +45,14 @@ public class Weapon : MonoBehaviour
     {
         DisplayAmmo();
 
-        if (Input.GetMouseButtonDown(0) && canShoot == true) //chesks if the left mouse button is pressed
+        if (Input.GetMouseButtonDown(0) && canShoot == true && !isReloading) //chesks if the left mouse button is pressed
         {
             StartCoroutine(Shoot());
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            StartCoroutine(Reload());
         }
     }
 
@@ -51,16 +64,13 @@ public class Weapon : MonoBehaviour
         {
             ProccessRayCast();
             PlayMuzzleFlash();
+            weaponAnimator.SetTrigger("Shoot");
             currentAmmoInClip--;
         }
 
         yield return new WaitForSeconds(timeBetweenShots);
+        weaponAnimator.SetTrigger("Idle");
         canShoot = true;
-
-        if (ammoSlot.GetCurrentAmmo(ammoType) > 0 && !isReloading)
-        {
-            StartCoroutine(Reload());
-        }
     }
 
     void ProccessRayCast() //procceses raycast
@@ -106,6 +116,7 @@ public class Weapon : MonoBehaviour
         }
         isReloading = true;
         canShoot = false;
+        weaponAnimator.SetTrigger("Reload");
         yield return new WaitForSeconds(reloadTime);
         int neededAmmo = maxAmmo - currentAmmoInClip;
         int ammoAvailibl = ammoSlot.GetCurrentAmmo(ammoType);
@@ -113,6 +124,7 @@ public class Weapon : MonoBehaviour
         currentAmmoInClip += AmmoToReload;
         ammoSlot.ReduceCurrentAmmo(ammoType, AmmoToReload);
         isReloading = false;
+        weaponAnimator.SetTrigger("Idle");
         canShoot = true;
     }
 }
